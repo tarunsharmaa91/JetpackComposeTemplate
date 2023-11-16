@@ -1,6 +1,6 @@
 package com.koin.jetpackcomposetemplate.di
 
-import com.koin.jetpackcomposetemplate.api.TweetsApi
+import com.koin.jetpackcomposetemplate.data.network.TweetsApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,17 +12,20 @@ import javax.inject.Singleton
 @Module
 //Below line will create single object in whole app for this module
 @InstallIn(SingletonComponent::class)
-class NetworkModule {
+object NetworkModule {
     @Singleton
     @Provides
-    fun providesRetrofit(): Retrofit{
-        return Retrofit.Builder().baseUrl("https://api.jsonbin.io/")
-            .addConverterFactory(GsonConverterFactory.create()).build()
+    fun providesRetrofit(): TweetsApi{
+        return Retrofit.Builder().run {
+            baseUrl(TweetsApi.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        }.create(TweetsApi::class.java)
     }
 
-    @Singleton
+    /*@Singleton
     @Provides
-    fun providesTweetsApi(retrofit: Retrofit): TweetsApi{
+    fun providesTweetsApi(retrofit: Retrofit): TweetsApi {
         return retrofit.create(TweetsApi::class.java)
-    }
+    }*/
 }
