@@ -1,4 +1,4 @@
-package com.koin.jetpackcomposetemplate.models
+package com.koin.jetpackcomposetemplate
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

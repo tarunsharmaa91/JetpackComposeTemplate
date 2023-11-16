@@ -1,4 +1,4 @@
-package com.koin.jetpackcomposetemplate.models
+package com.koin.jetpackcomposetemplate.data.model.Tweets
 
 data class TweetList(
     val `data`: List<Data>,

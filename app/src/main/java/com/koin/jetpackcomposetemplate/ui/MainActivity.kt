@@ -1,43 +1,33 @@
-package com.koin.jetpackcomposetemplate
+package com.koin.jetpackcomposetemplate.ui
 
-import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.koin.jetpackcomposetemplate.api.TweetsApi
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.koin.jetpackcomposetemplate.features.tweets.ui.TweetListScreen
+import com.koin.jetpackcomposetemplate.features.tweets.ui.TweetViewModel
 import com.koin.jetpackcomposetemplate.ui.theme.JetpackComposeTemplateTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var tweetsApi: TweetsApi
+    val viewModel:TweetViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        GlobalScope.launch {
-            var response = tweetsApi.getTweets()
-            Log.d("Response", response.body().toString())
-        }
         setContent {
             JetpackComposeTemplateTheme {
                 // A surface container using the 'background' color from the theme
@@ -45,52 +35,109 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    var shouldShowMainScreen by remember {
+                    App(viewModel)
+                    /*var shouldShowMainScreen by remember {
                         mutableStateOf(true)
                     }
                     if (shouldShowMainScreen) {
                         MyApp(onContinueClicked = { shouldShowMainScreen = false })
                     } else {
                         ShowListing()
-                    }
+                    }*/
 
                 }
             }
         }
     }
 
-    @Composable
-    fun ShowListing() {
-        LazyColumn(content = {
-            items(getCategoryList()){
-                value -> CardList(name = value.name)
+    /* @Composable
+     fun ShowListing() {
+         LazyColumn(content = {
+             items(getCategoryList()){
+                 value -> CardList(name = value.name)
+             }
+         })
+     }
+
+     @Composable
+     fun getList (name: String, desc: String){
+         CardList()
+     }
+
+
+     data class Item(val name: String, val desc: String)
+
+     private fun getCategoryList(): MutableList<Item> {
+         val listOfItems = mutableListOf<Item>()
+         listOfItems.add(Item(name = "Test", desc = "NO"))
+         listOfItems.add(Item(name = "Test1hyv", desc = "NO"))
+         listOfItems.add(Item(name = "Tesdufiyt", desc = "NO"))
+         listOfItems.add(Item(name = "Tejhfst", desc = "NO"))
+         listOfItems.add(Item(name = "Tkhbfjest", desc = "NO"))
+         listOfItems.add(Item(name = "Thest", desc = "NO"))
+         listOfItems.add(Item(name = "Tesfjht", desc = "NO"))
+         listOfItems.add(Item(name = "Tcjhest", desc = "NO"))
+         return listOfItems
+     }*/
+}
+
+@Composable
+fun App(viewModel: TweetViewModel) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "login") {
+        composable(route = "registration") {
+            RegistrationScreen(navController)
+        }
+        composable(route = "login") {
+            LoginScreen{
+                navController.navigate("main/${it}")
             }
-        })
-    }
-    
-    @Composable
-    fun getList (name: String, desc: String){
-        CardList()
-    }
-    
-
-    data class Item(val name: String, val desc: String)
-
-    private fun getCategoryList(): MutableList<Item> {
-        val listOfItems = mutableListOf<Item>()
-        listOfItems.add(Item(name = "Test", desc = "NO"))
-        listOfItems.add(Item(name = "Test1hyv", desc = "NO"))
-        listOfItems.add(Item(name = "Tesdufiyt", desc = "NO"))
-        listOfItems.add(Item(name = "Tejhfst", desc = "NO"))
-        listOfItems.add(Item(name = "Tkhbfjest", desc = "NO"))
-        listOfItems.add(Item(name = "Thest", desc = "NO"))
-        listOfItems.add(Item(name = "Tesfjht", desc = "NO"))
-        listOfItems.add(Item(name = "Tcjhest", desc = "NO"))
-        return listOfItems
+        }
+        composable(route = "main/{email}", arguments = listOf(
+            navArgument("email"){
+                type = NavType.StringType
+            }
+        )) {
+           val email = it.arguments?.getString("email")
+            MainScreen(navController, email)
+        }
+        composable(route = "tweet_list") {
+            TweetListScreen(viewModel)
+        }
     }
 }
 
 @Composable
+fun RegistrationScreen(navController: NavHostController) {
+    Text(text = "Registration",
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.clickable {
+            navController.navigate("main")
+        }
+    )
+}
+
+@Composable
+fun LoginScreen(onClick : (email : String)-> Unit) {
+    Text(text = "Login",
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.clickable {
+            onClick("test@gmail.com")
+        }
+    )
+}
+
+@Composable
+fun MainScreen(navController: NavHostController, email: String?) {
+    Text(text = "Main $email",
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.clickable {
+            navController.navigate("tweet_list")
+        }
+    )
+}
+
+/*@Composable
 fun MyApp(onContinueClicked: () -> Unit) {
     Surface(
         color = MaterialTheme.colors.primary,
@@ -180,4 +227,4 @@ fun DefaultPreview() {
     JetpackComposeTemplateTheme {
         CardList()
     }
-}
+}*/
